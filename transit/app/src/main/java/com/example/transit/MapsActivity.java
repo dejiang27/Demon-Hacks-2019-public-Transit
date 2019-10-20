@@ -199,7 +199,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
         getLocationPermission();
-        mMap.setMyLocationEnabled(true);
+//        mMap.setMyLocationEnabled(true);
 
         getDeviceLocation();
         mMap.moveCamera(CameraUpdateFactory
