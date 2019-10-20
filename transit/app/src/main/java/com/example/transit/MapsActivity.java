@@ -16,25 +16,32 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.widget.EditText;
 import java.io.IOException;
 import java.util.List;
+
+import static android.provider.SettingsSlicesContract.KEY_LOCATION;
 
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
 
     private GoogleMap mMap;
+    private CameraPosition mCameraPosition;
+
     private Location mLastKnownLocation;
     private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
     private FusedLocationProviderClient mFusedLocationProviderClient;
+    private static final String KEY_CAMERA_POSITION = "camera_position";
 
     private boolean mLocationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -43,6 +50,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        if (savedInstanceState != null) {
+            mLastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
+            mCameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
+        }
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -51,6 +62,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (mMap != null) {
+            outState.putParcelable(KEY_CAMERA_POSITION, mMap.getCameraPosition());
+            outState.putParcelable(KEY_LOCATION, mLastKnownLocation);
+            super.onSaveInstanceState(outState);
+        }
+    }
 
     public void onSearch(View view){
         List<Address> addressList = null;
@@ -137,13 +156,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         getLocationPermission();
+        //mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
         getDeviceLocation();
 
         // Add a marker in Sydney and move the camera
         //LatLng depaul = new LatLng(41.8778108, -87.6278301);
         //mMap.addMarker(new MarkerOptions().position(depaul).title("Marker in DePaul"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(depaul, 15f));
-
-        //mMap.setMyLocationEnabled(true);
+        //mMap.getUiSettings().setMyLocationButtonEnabled(true);
     }
 }
