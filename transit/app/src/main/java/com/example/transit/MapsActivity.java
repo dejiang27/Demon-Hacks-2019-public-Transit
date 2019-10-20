@@ -39,7 +39,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private CameraPosition mCameraPosition;
 
     private Location mLastKnownLocation;
-    private final LatLng mDefaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private final LatLng mDefaultLocation = new LatLng(41.8778108, -87.6278301);
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private static final String KEY_CAMERA_POSITION = "camera_position";
 
@@ -70,6 +70,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             super.onSaveInstanceState(outState);
         }
     }
+
+    public void zooms(View view){
+        if(view.getId() == R.id.button3){
+            mMap.animateCamera(CameraUpdateFactory.zoomIn());
+        }
+        if(view.getId() == R.id.button2){
+            mMap.animateCamera(CameraUpdateFactory.zoomOut());
+        }
+    }
+
 
     public void onSearch(View view){
         List<Address> addressList = null;
@@ -130,9 +140,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && task.getResult() != null) {
                             // Set the map's camera position to the current location of the device.
                             mLastKnownLocation = task.getResult();
+
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(mLastKnownLocation.getLatitude(),
                                             mLastKnownLocation.getLongitude()), 15f));
@@ -160,6 +171,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         getDeviceLocation();
 
+        mMap.getUiSettings().setZoomControlsEnabled(true);
         // Add a marker in Sydney and move the camera
         //LatLng depaul = new LatLng(41.8778108, -87.6278301);
         //mMap.addMarker(new MarkerOptions().position(depaul).title("Marker in DePaul"));

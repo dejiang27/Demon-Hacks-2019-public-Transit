@@ -26,10 +26,39 @@
             android:text="Search" />
 
     </LinearLayout>
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="686dp"
-        tools:context=".MapsActivity" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
+
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="630dp"
+            tools:context=".MapsActivity" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="205dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/map"
+            android:textSize="20dp"
+            android:layout_marginTop="0dp"
+            android:onClick="zooms"
+            android:text="-" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="205dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/map"
+            android:layout_marginTop="0dp"
+            android:layout_toRightOf="@id/button3"
+            android:text="+"
+            android:onClick="zooms"
+            android:textSize="20dp"/>
+    </RelativeLayout>
+
 </LinearLayout>
