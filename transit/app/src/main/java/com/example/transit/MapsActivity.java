@@ -5,6 +5,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -16,8 +17,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -37,14 +40,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
     private CameraPosition mCameraPosition;
-
     private Location mLastKnownLocation;
-    private final LatLng mDefaultLocation = new LatLng(41.8778108, -87.6278301);
+    private final LatLng mDefaultLocation = new LatLng( 41.8778108, -87.6278301);
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private static final String KEY_CAMERA_POSITION = "camera_position";
-
     private boolean mLocationPermissionGranted;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 3;
+    //private static final String TAG = MapsActivityRaw.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +61,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
     }
 
     @Override
@@ -80,12 +81,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    private int x = 0 ;
 
     public void onSearch(View view){
-        List<Address> addressList = null;
         EditText location_tf = findViewById(R.id.TFLocation);
         String location = location_tf.getText().toString();
+        List<Address> addressList = null;
 
+        if(x == 2){
+            mMap.clear();
+            x = 0;
+        }
         if(location != null || !location.equals("")){
             Geocoder geocoder = new Geocoder(this);
             try{
@@ -94,14 +100,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }catch(IOException e){
                 e.printStackTrace();
             }
-            Address address = addressList.get(0);
-            LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+            if(x == 0) {
+                Address address = addressList.get(0);
+                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
 
-            mMap.addMarker(new MarkerOptions().position(latLng).title("New"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
+                mMap.addMarker(new MarkerOptions().position(latLng).title("New").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
+                x ++;
+            }else{
+                Address address = addressList.get(0);
+                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+
+                mMap.addMarker(new MarkerOptions().position(latLng).title("old").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f));
+                x++;
+            }
         }
-}
+    }
 
 
     /**
@@ -165,13 +182,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            boolean success = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.map_style));
 
-        getLocationPermission();
-        //mMap.getUiSettings().setMyLocationButtonEnabled(true);
-
-        getDeviceLocation();
+            if (!success) {
+                //Log.e(TAG, "Style parsing failed.");
+            }
+        } catch (Resources.NotFoundException e) {
+            //Log.e(TAG, "Can't find style. Error: ", e);
+        }
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
+
+        getLocationPermission();
+        mMap.setMyLocationEnabled(true);
+
+        getDeviceLocation();
+        mMap.moveCamera(CameraUpdateFactory
+                .newLatLngZoom(mDefaultLocation, 15f));
         // Add a marker in Sydney and move the camera
         //LatLng depaul = new LatLng(41.8778108, -87.6278301);
         //mMap.addMarker(new MarkerOptions().position(depaul).title("Marker in DePaul"));
